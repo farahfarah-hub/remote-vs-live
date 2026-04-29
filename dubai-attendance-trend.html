@@ -1355,6 +1355,74 @@
         font-size: 22px;
       }
     }
+
+    .score-bar {
+      display: grid;
+      grid-template-columns: 160px 1fr 110px;
+      gap: 14px;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.16);
+    }
+
+    .score-bar:last-of-type { border-bottom: 0; }
+
+    .score-bar .name {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .score-bar .name span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .score-bar .track {
+      position: relative;
+      height: 20px;
+      border-radius: 999px;
+      background: rgba(220, 38, 38, 0.08);
+      overflow: hidden;
+    }
+
+    .score-bar .fill {
+      position: absolute;
+      inset: 0;
+      width: 0;
+      background: linear-gradient(90deg, #f97316 0%, #dc2626 100%);
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .score-bar .meta {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+      color: #b91c1c;
+    }
+
+    .score-bar .meta span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 2px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 720px) {
+      .score-bar {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .score-bar .meta {
+        text-align: left;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1445,7 +1513,7 @@
       <section class="hero section-header">
         <div class="eyebrow">Client experience · Frustration rate</div>
         <h2>Frustration: Remote vs Live Attendance</h2>
-        <p>Share of clients who reported frustration in each attendance setup. Lower is better. Sunday is shown separately because all live operations are paused that day.</p>
+        <p>Share of clients who reported frustration in each attendance setup, plus the average frustration score (more negative = more intense frustration). Sunday is shown separately because all live operations are paused that day.</p>
       </section>
 
       <section class="card">
@@ -1459,8 +1527,12 @@
           <span class="legend-item"><span class="swatch" style="background: #0f766e"></span>Not frustrated</span>
         </div>
 
+        <h3 style="margin: 22px 0 4px; font-size: 16px; letter-spacing: -0.01em;">Average frustration score</h3>
+        <p style="margin: 0 0 10px; font-size: 13px; color: var(--muted);">Lower (more negative) means more intense frustration among clients who reported it.</p>
+        <div id="frustrationScoreBars"></div>
+
         <div class="insight" style="margin-top: 18px;">
-          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%). Remote is lower (32.1%), and Sunday is the calmest with only 14.3% reporting frustration.
+          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%, avg score −3.60). Sunday has the fewest frustrated clients (14.3%) but the most intense average score (−4.18) — fewer people complain, but those who do feel it strongly. Remote is calmest by both measures (32.1% frustrated, avg score −2.83).
         </div>
 
         <table class="data-table" aria-label="Frustration data table" style="margin-top: 18px;">
@@ -1471,6 +1543,7 @@
               <th class="num">Not frustrated</th>
               <th class="num">Total</th>
               <th class="num">Frustration %</th>
+              <th class="num">Avg score</th>
             </tr>
           </thead>
           <tbody id="frustrationTable"></tbody>
@@ -10128,9 +10201,9 @@
 
     /* ========= Frustration section ========= */
     const frustrationData = [
-      { name: "Live attendance", description: "Maid physically attends the office", frustrated: 13, notFrustrated: 20 },
-      { name: "Remote attendance", description: "Maid attends from her home", frustrated: 9, notFrustrated: 19 },
-      { name: "Sunday attendance", description: "Sundays only — all remote from home", frustrated: 1, notFrustrated: 6 }
+      { name: "Live attendance", description: "Maid physically attends the office", frustrated: 13, notFrustrated: 20, avgScore: -3.6 },
+      { name: "Remote attendance", description: "Maid attends from her home", frustrated: 9, notFrustrated: 19, avgScore: -2.829 },
+      { name: "Sunday attendance", description: "Sundays only — all remote from home", frustrated: 1, notFrustrated: 6, avgScore: -4.177 }
     ];
 
     function renderFrustration() {
@@ -10140,13 +10213,14 @@
       const overallPct = (totalFrustrated / totalSample) * 100;
       const top = [...frustrationData].sort((a, b) => (b.frustrated / (b.frustrated + b.notFrustrated)) - (a.frustrated / (a.frustrated + a.notFrustrated)))[0];
       const lowest = [...frustrationData].sort((a, b) => (a.frustrated / (a.frustrated + a.notFrustrated)) - (b.frustrated / (b.frustrated + b.notFrustrated)))[0];
+      const mostIntense = [...frustrationData].sort((a, b) => a.avgScore - b.avgScore)[0];
 
       tiles.innerHTML = "";
       const tileSpec = [
         { label: "Total clients sampled", value: totalSample, sub: "across the three setups" },
         { label: "Reported frustration", value: totalFrustrated, sub: overallPct.toFixed(1) + "% of sample" },
-        { label: "Most frustrating setup", value: top.name.split(" ")[0], sub: ((top.frustrated / (top.frustrated + top.notFrustrated)) * 100).toFixed(1) + "% frustrated" },
-        { label: "Calmest setup", value: lowest.name.split(" ")[0], sub: ((lowest.frustrated / (lowest.frustrated + lowest.notFrustrated)) * 100).toFixed(1) + "% frustrated" }
+        { label: "Highest frustration rate", value: top.name.split(" ")[0], sub: ((top.frustrated / (top.frustrated + top.notFrustrated)) * 100).toFixed(1) + "% frustrated" },
+        { label: "Most intense avg score", value: mostIntense.avgScore.toFixed(2), sub: mostIntense.name.split(" ")[0] + " setup" }
       ];
       for (const tile of tileSpec) {
         const div = document.createElement("div");
@@ -10173,6 +10247,25 @@
         barsHost.appendChild(bar);
       }
 
+      const scoreHost = document.getElementById("frustrationScoreBars");
+      scoreHost.innerHTML = "";
+      const maxAbs = Math.max(...frustrationData.map((r) => Math.abs(r.avgScore)));
+      for (const row of frustrationData) {
+        const fillPct = (Math.abs(row.avgScore) / maxAbs) * 100;
+        const bar = document.createElement("div");
+        bar.className = "score-bar";
+        bar.innerHTML =
+          '<div class="name">' + row.name + '<span>' + row.description + '</span></div>' +
+          '<div class="track" role="img" aria-label="' + row.name + ' average score"><div class="fill" data-target="' + fillPct.toFixed(2) + '"></div></div>' +
+          '<div class="meta">' + row.avgScore.toFixed(2) + '<span>avg score</span></div>';
+        scoreHost.appendChild(bar);
+      }
+      requestAnimationFrame(() => {
+        scoreHost.querySelectorAll(".fill").forEach((el) => {
+          el.style.width = el.dataset.target + "%";
+        });
+      });
+
       const tableBody = document.getElementById("frustrationTable");
       tableBody.innerHTML = "";
       for (const row of frustrationData) {
@@ -10184,7 +10277,8 @@
           '<td class="num">' + row.frustrated + '</td>' +
           '<td class="num">' + row.notFrustrated + '</td>' +
           '<td class="num">' + total + '</td>' +
-          '<td class="num">' + pct + '%</td>';
+          '<td class="num">' + pct + '%</td>' +
+          '<td class="num">' + row.avgScore.toFixed(2) + '</td>';
         tableBody.appendChild(tr);
       }
     }
