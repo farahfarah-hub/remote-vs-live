@@ -951,6 +951,138 @@
       .peak-bar { grid-template-columns: 78px 1fr 110px; gap: 10px; }
     }
 
+    .daybar-wrap {
+      margin: 18px 0 6px;
+    }
+
+    .daybar {
+      position: relative;
+      height: 26px;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 30px;
+      background: rgba(152, 162, 179, 0.18);
+    }
+
+    .daybar .ok-zone,
+    .daybar .block-zone {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .daybar .ok-zone {
+      left: 0;
+      width: 50%;
+      background: rgba(15, 118, 110, 0.28);
+    }
+
+    .daybar .block-zone {
+      left: 50%;
+      width: 50%;
+      background: rgba(220, 38, 38, 0.22);
+    }
+
+    .daybar .cutoff {
+      position: absolute;
+      left: 50%;
+      top: -10px;
+      bottom: -10px;
+      width: 2px;
+      background: #111827;
+      transform: translateX(-1px);
+    }
+
+    .daybar .pin {
+      position: absolute;
+      top: -10px;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #dc2626;
+      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.18);
+      transform: translate(-50%, -100%);
+    }
+
+    .daybar .pin::after {
+      content: attr(data-label);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 6px;
+      font-size: 11px;
+      font-weight: 850;
+      color: #b91c1c;
+      white-space: nowrap;
+    }
+
+    .daybar-axis {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .daybar-axis .cut {
+      color: #b91c1c;
+    }
+
+    .request-rows {
+      margin-top: 14px;
+      border-top: 1px solid rgba(152, 162, 179, 0.16);
+    }
+
+    .request-row {
+      display: grid;
+      grid-template-columns: 90px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.16);
+      font-size: 14px;
+    }
+
+    .request-row:last-child {
+      border-bottom: 0;
+    }
+
+    .request-row .time {
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .request-row .label-text {
+      color: var(--muted);
+    }
+
+    .request-row .badge {
+      background: rgba(220, 38, 38, 0.1);
+      color: #b91c1c;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 5px 10px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    @media (max-width: 600px) {
+      .request-row {
+        grid-template-columns: 70px 1fr;
+        row-gap: 4px;
+      }
+      .request-row .badge {
+        grid-column: 1 / -1;
+        justify-self: start;
+      }
+    }
+
     /* ===========================================================
        Responsive compaction (added to fit 14" laptops and below)
        =========================================================== */
@@ -1392,6 +1524,81 @@
           <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #ea580c, #dc2626)"></span>Peak hours</span>
           <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #7c3aed, #2563eb)"></span>Active hours</span>
           <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #94a3b8, #64748b)"></span>Quiet hours</span>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="section-header" style="margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 18px; letter-spacing: -0.01em;">Same-day join requests — last 14 days (over chat)</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">The cutoff to start a maid the same day is 12:00. Anything later cannot be fulfilled the same day.</p>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-tile">
+            <div class="label">Same-day requests</div>
+            <div class="value">3</div>
+            <div class="sub">in the last 14 days</div>
+          </div>
+          <div class="stat-tile">
+            <div class="label">Total replacements</div>
+            <div class="value">60</div>
+            <div class="sub">in the last 14 days</div>
+          </div>
+          <div class="stat-tile">
+            <div class="label">Same-day request rate</div>
+            <div class="value">5%</div>
+            <div class="sub">of replacements asked same day</div>
+          </div>
+          <div class="stat-tile">
+            <div class="label">Fulfilled same day</div>
+            <div class="value">0</div>
+            <div class="sub">all 3 came after the 12:00 cutoff</div>
+          </div>
+        </div>
+
+        <div class="daybar-wrap" aria-label="Same-day request times against the 12:00 cutoff">
+          <div class="daybar">
+            <div class="ok-zone"></div>
+            <div class="block-zone"></div>
+            <div class="cutoff" aria-hidden="true"></div>
+            <div class="pin" style="left: 52.08%;" data-label="12:30"></div>
+            <div class="pin" style="left: 54.17%;" data-label="13:00 ×2"></div>
+          </div>
+          <div class="daybar-axis" aria-hidden="true">
+            <span>00:00</span>
+            <span>06:00</span>
+            <span class="cut">12:00 cutoff</span>
+            <span>18:00</span>
+            <span>24:00</span>
+          </div>
+        </div>
+
+        <div class="legend inline" aria-label="Day timeline legend">
+          <span class="legend-item"><span class="swatch" style="background: rgba(15, 118, 110, 0.55)"></span>Same-day still possible (before 12:00)</span>
+          <span class="legend-item"><span class="swatch" style="background: rgba(220, 38, 38, 0.45)"></span>Same-day not possible (after 12:00)</span>
+          <span class="legend-item"><span class="swatch" style="background: #dc2626; border-radius: 50%; width: 12px; height: 12px;"></span>Client request</span>
+        </div>
+
+        <div class="request-rows">
+          <div class="request-row">
+            <span class="time">12:30</span>
+            <span class="label-text">Same-day join requested over chat</span>
+            <span class="badge">Not fulfilled</span>
+          </div>
+          <div class="request-row">
+            <span class="time">13:00</span>
+            <span class="label-text">Same-day join requested over chat</span>
+            <span class="badge">Not fulfilled</span>
+          </div>
+          <div class="request-row">
+            <span class="time">13:00</span>
+            <span class="label-text">Same-day join requested over chat</span>
+            <span class="badge">Not fulfilled</span>
+          </div>
+        </div>
+
+        <div class="insight" style="margin-top: 16px;">
+          <strong>Read:</strong> 3 of 60 replacements in the last 14 days (5%) asked for a same-day join — two at 13:00 and one at 12:30. All three came in after the 12:00 cutoff, so none could be fulfilled the same day.
         </div>
       </section>
     </div>
