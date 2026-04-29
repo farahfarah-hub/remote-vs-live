@@ -1513,7 +1513,7 @@
       <section class="hero section-header">
         <div class="eyebrow">Client experience · Frustration rate</div>
         <h2>Frustration: Remote vs Live Attendance</h2>
-        <p>Share of clients who reported frustration in each attendance setup, plus the average frustration score (more negative = more intense frustration). Sunday is shown separately because all live operations are paused that day.</p>
+        <p>Share of clients who reported frustration in each attendance setup, plus the average maid score given by clients (lower means a worse rating). Sunday is shown separately because all live operations are paused that day.</p>
       </section>
 
       <section class="card">
@@ -1527,12 +1527,12 @@
           <span class="legend-item"><span class="swatch" style="background: #0f766e"></span>Not frustrated</span>
         </div>
 
-        <h3 style="margin: 22px 0 4px; font-size: 16px; letter-spacing: -0.01em;">Average frustration score</h3>
-        <p style="margin: 0 0 10px; font-size: 13px; color: var(--muted);">Lower (more negative) means more intense frustration among clients who reported it.</p>
+        <h3 style="margin: 22px 0 4px; font-size: 16px; letter-spacing: -0.01em;">Average maid score</h3>
+        <p style="margin: 0 0 10px; font-size: 13px; color: var(--muted);">Average score clients gave the maid in each setup. Lower (more negative) means a worse rating.</p>
         <div id="frustrationScoreBars"></div>
 
         <div class="insight" style="margin-top: 18px;">
-          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%, avg score −3.60). Sunday has the fewest frustrated clients (14.3%) but the most intense average score (−4.18) — fewer people complain, but those who do feel it strongly. Remote is calmest by both measures (32.1% frustrated, avg score −2.83).
+          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%) and a maid score of −3.60. Sunday has the fewest frustrated clients (14.3%) but the lowest maid score (−4.18) — fewer complaints, yet harshest ratings. Remote is calmest by both measures (32.1% frustrated, maid score −2.83).
         </div>
 
         <table class="data-table" aria-label="Frustration data table" style="margin-top: 18px;">
@@ -1543,7 +1543,7 @@
               <th class="num">Not frustrated</th>
               <th class="num">Total</th>
               <th class="num">Frustration %</th>
-              <th class="num">Avg score</th>
+              <th class="num">Avg maid score</th>
             </tr>
           </thead>
           <tbody id="frustrationTable"></tbody>
@@ -10220,7 +10220,7 @@
         { label: "Total clients sampled", value: totalSample, sub: "across the three setups" },
         { label: "Reported frustration", value: totalFrustrated, sub: overallPct.toFixed(1) + "% of sample" },
         { label: "Highest frustration rate", value: top.name.split(" ")[0], sub: ((top.frustrated / (top.frustrated + top.notFrustrated)) * 100).toFixed(1) + "% frustrated" },
-        { label: "Most intense avg score", value: mostIntense.avgScore.toFixed(2), sub: mostIntense.name.split(" ")[0] + " setup" }
+        { label: "Lowest avg maid score", value: mostIntense.avgScore.toFixed(2), sub: mostIntense.name.split(" ")[0] + " setup" }
       ];
       for (const tile of tileSpec) {
         const div = document.createElement("div");
@@ -10257,7 +10257,7 @@
         bar.innerHTML =
           '<div class="name">' + row.name + '<span>' + row.description + '</span></div>' +
           '<div class="track" role="img" aria-label="' + row.name + ' average score"><div class="fill" data-target="' + fillPct.toFixed(2) + '"></div></div>' +
-          '<div class="meta">' + row.avgScore.toFixed(2) + '<span>avg score</span></div>';
+          '<div class="meta">' + row.avgScore.toFixed(2) + '<span>avg maid score</span></div>';
         scoreHost.appendChild(bar);
       }
       requestAnimationFrame(() => {
