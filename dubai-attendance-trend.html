@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Dubai Attendance Trend - Remote vs Live</title>
+  <title>Dubai Operations Dashboard</title>
   <style>
     :root {
       --bg: #f6f7fb;
@@ -586,10 +586,381 @@
         display: grid;
       }
     }
+
+    .tabnav {
+      position: sticky;
+      top: 12px;
+      z-index: 30;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 10px;
+      margin: 0 0 22px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.94);
+      border: 1px solid rgba(152, 162, 179, 0.28);
+      backdrop-filter: saturate(140%) blur(8px);
+    }
+
+    .tabnav button {
+      flex: 1 1 180px;
+      padding: 11px 16px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .tabnav button:hover {
+      color: var(--text);
+      background: rgba(124, 58, 237, 0.06);
+    }
+
+    .tabnav button.active {
+      color: #fff;
+      background: var(--text);
+      border-color: var(--text);
+    }
+
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    .section-header {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: clamp(26px, 3.6vw, 38px);
+      letter-spacing: -0.02em;
+    }
+
+    .section-header p {
+      margin: 0;
+      max-width: 880px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .stat-tile {
+      padding: 18px 20px;
+      border-radius: 16px;
+      border: 1px solid rgba(152, 162, 179, 0.22);
+      background: #fff;
+    }
+
+    .stat-tile .label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .stat-tile .value {
+      margin-top: 8px;
+      font-size: 30px;
+      font-weight: 850;
+      letter-spacing: -0.02em;
+    }
+
+    .stat-tile .sub {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .grid-2 {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+      align-items: start;
+    }
+
+    .insight {
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid rgba(124, 58, 237, 0.18);
+      background: rgba(124, 58, 237, 0.05);
+      color: #4c1d95;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .insight strong { color: #2e1065; }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .data-table th, .data-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.2);
+      text-align: left;
+    }
+
+    .data-table th {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      background: rgba(124, 58, 237, 0.04);
+    }
+
+    .data-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .frustration-bar {
+      display: grid;
+      grid-template-columns: 160px 1fr 90px;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.18);
+    }
+
+    .frustration-bar:last-of-type { border-bottom: 0; }
+
+    .frustration-bar .name {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .frustration-bar .name span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .stack-bar {
+      position: relative;
+      display: flex;
+      width: 100%;
+      height: 28px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(152, 162, 179, 0.18);
+    }
+
+    .stack-bar .seg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    .stack-bar .seg.frustration { background: #dc2626; }
+    .stack-bar .seg.calm { background: #0f766e; }
+
+    .frustration-bar .total {
+      text-align: right;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .legend.inline {
+      justify-content: flex-start;
+      gap: 18px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .legend.inline .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+    }
+
+    .relocation-flex {
+      display: grid;
+      gap: 22px;
+      grid-template-columns: minmax(0, 360px) minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .donut-wrap {
+      display: grid;
+      place-items: center;
+      padding: 12px;
+    }
+
+    .donut-svg {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+    }
+
+    .relocation-rows .reloc-row {
+      display: grid;
+      grid-template-columns: 16px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.18);
+    }
+
+    .relocation-rows .reloc-row:last-of-type { border-bottom: 0; }
+
+    .reloc-row .swatch-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+    }
+
+    .reloc-row .label {
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+
+    .reloc-row .label span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0;
+      margin-top: 4px;
+    }
+
+    .reloc-row .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .reloc-row .num strong {
+      font-size: 22px;
+      letter-spacing: -0.01em;
+    }
+
+    .reloc-row .num span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .peak-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .peak-controls .seg-toggle {
+      display: inline-flex;
+      padding: 4px;
+      gap: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(152, 162, 179, 0.28);
+      background: #fff;
+    }
+
+    .peak-controls .seg-toggle button {
+      padding: 8px 14px;
+      border-radius: 9px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .peak-controls .seg-toggle button.active {
+      background: var(--text);
+      color: #fff;
+    }
+
+    .peak-bar {
+      display: grid;
+      grid-template-columns: 110px 1fr 130px;
+      gap: 14px;
+      align-items: center;
+      padding: 7px 0;
+    }
+
+    .peak-bar .hour {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .peak-bar .track {
+      position: relative;
+      height: 22px;
+      border-radius: 999px;
+      background: rgba(124, 58, 237, 0.08);
+      overflow: hidden;
+    }
+
+    .peak-bar .fill {
+      position: absolute;
+      inset: 0;
+      width: 0;
+      background: linear-gradient(90deg, #7c3aed 0%, #2563eb 100%);
+      border-radius: 999px;
+      transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+
+    .peak-bar .fill.peak { background: linear-gradient(90deg, #ea580c 0%, #dc2626 100%); }
+    .peak-bar .fill.quiet { background: linear-gradient(90deg, #94a3b8 0%, #64748b 100%); }
+
+    .peak-bar .meta {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+    }
+
+    .peak-bar .meta span {
+      display: inline-block;
+      color: var(--muted);
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    @media (max-width: 720px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .relocation-flex { grid-template-columns: 1fr; }
+      .frustration-bar { grid-template-columns: 1fr; gap: 6px; }
+      .peak-bar { grid-template-columns: 78px 1fr 110px; gap: 10px; }
+    }
   </style>
 </head>
 <body>
   <main class="wrap">
+    <nav class="tabnav" id="sectionNav" aria-label="Dashboard sections">
+      <button type="button" class="active" data-tab="tab-trend">Attendance Trend</button>
+      <button type="button" data-tab="tab-frustration">Frustration: Remote vs Live</button>
+      <button type="button" data-tab="tab-relocation">Relocation to Satwa</button>
+      <button type="button" data-tab="tab-peakhours">Tagging Peak Hours</button>
+    </nav>
+
+    <div class="tab-section active" id="tab-trend">
     <section class="hero">
       <div class="eyebrow">Dubai only · Last 15 days</div>
       <h1>Dubai Attendance Trend</h1>
@@ -662,6 +1033,94 @@
         </div>
       </div>
     </section>
+    </div>
+
+    <div class="tab-section" id="tab-frustration">
+      <section class="hero section-header">
+        <div class="eyebrow">Client experience · Frustration rate</div>
+        <h2>Frustration: Remote vs Live Attendance</h2>
+        <p>Share of clients who reported frustration in each attendance setup. Lower is better. Sunday is shown separately because all live operations are paused that day.</p>
+      </section>
+
+      <section class="card">
+        <div class="stat-grid" id="frustrationTiles"></div>
+
+        <h3 style="margin: 8px 0 12px; font-size: 16px; letter-spacing: -0.01em;">Frustration share by setup</h3>
+        <div id="frustrationBars"></div>
+
+        <div class="legend inline" aria-label="Bar legend">
+          <span class="legend-item"><span class="swatch" style="background: #dc2626"></span>Frustrated</span>
+          <span class="legend-item"><span class="swatch" style="background: #0f766e"></span>Not frustrated</span>
+        </div>
+
+        <div class="insight" style="margin-top: 18px;">
+          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%). Remote is lower (32.1%), and Sunday is the calmest with only 14.3% reporting frustration.
+        </div>
+
+        <table class="data-table" aria-label="Frustration data table" style="margin-top: 18px;">
+          <thead>
+            <tr>
+              <th>Setup</th>
+              <th class="num">Frustrated</th>
+              <th class="num">Not frustrated</th>
+              <th class="num">Total</th>
+              <th class="num">Frustration %</th>
+            </tr>
+          </thead>
+          <tbody id="frustrationTable"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <div class="tab-section" id="tab-relocation">
+      <section class="hero section-header">
+        <div class="eyebrow">Operations · Relocation to Satwa</div>
+        <h2>Relocation to Satwa Summary</h2>
+        <p>Of <strong>154 maids</strong> in scope, this is the breakdown of who already moved, who agreed and is still in transit, and who refused (and was terminated).</p>
+      </section>
+
+      <section class="card">
+        <div class="stat-grid" id="relocationTiles"></div>
+
+        <div class="relocation-flex" style="margin-top: 8px;">
+          <div class="donut-wrap">
+            <svg id="relocationDonut" class="donut-svg" viewBox="0 0 200 200" role="img" aria-label="Relocation breakdown donut chart"></svg>
+          </div>
+          <div class="relocation-rows" id="relocationRows"></div>
+        </div>
+
+        <div class="insight" style="margin-top: 18px;">
+          <strong>Read:</strong> 54.5% of the sample (84 maids) have already moved to Satwa, another 25.3% (39) agreed but are still moving, and 20.8% (32) refused and were terminated.
+        </div>
+      </section>
+    </div>
+
+    <div class="tab-section" id="tab-peakhours">
+      <section class="hero section-header">
+        <div class="eyebrow">2 months of data · Peak hours</div>
+        <h2>Taggings per Hour — peak hours over 2 months</h2>
+        <p>Hours when maids get tagged to customers, sorted from busiest to quietest. Each bar shows the count of taggings and the share of total taggings in that hour.</p>
+      </section>
+
+      <section class="card">
+        <div class="stat-grid" id="peakTiles"></div>
+
+        <div class="peak-controls">
+          <div class="seg-toggle" id="peakSort" role="tablist" aria-label="Sort order">
+            <button type="button" class="active" data-sort="desc">Most to least</button>
+            <button type="button" data-sort="hour">By hour of day</button>
+          </div>
+        </div>
+
+        <div id="peakBars"></div>
+
+        <div class="legend inline" aria-label="Bar legend">
+          <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #ea580c, #dc2626)"></span>Peak hours</span>
+          <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #7c3aed, #2563eb)"></span>Active hours</span>
+          <span class="legend-item"><span class="swatch" style="background: linear-gradient(90deg, #94a3b8, #64748b)"></span>Quiet hours</span>
+        </div>
+      </section>
+    </div>
   </main>
 
   <script>
@@ -9327,6 +9786,269 @@
 
     populateDaySelect();
     render();
+
+    /* ========= Section navigation ========= */
+    const sectionNav = document.getElementById("sectionNav");
+    sectionNav.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-tab]");
+      if (!button) return;
+      const target = button.dataset.tab;
+      sectionNav.querySelectorAll("button").forEach((btn) => btn.classList.toggle("active", btn === button));
+      document.querySelectorAll(".tab-section").forEach((sec) => sec.classList.toggle("active", sec.id === target));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    /* ========= Frustration section ========= */
+    const frustrationData = [
+      { name: "Live attendance", description: "Maid physically attends the office", frustrated: 13, notFrustrated: 20 },
+      { name: "Remote attendance", description: "Maid attends from accommodation", frustrated: 9, notFrustrated: 19 },
+      { name: "Sunday attendance", description: "Sundays only — all remote", frustrated: 1, notFrustrated: 6 }
+    ];
+
+    function renderFrustration() {
+      const tiles = document.getElementById("frustrationTiles");
+      const totalFrustrated = frustrationData.reduce((s, r) => s + r.frustrated, 0);
+      const totalSample = frustrationData.reduce((s, r) => s + r.frustrated + r.notFrustrated, 0);
+      const overallPct = (totalFrustrated / totalSample) * 100;
+      const top = [...frustrationData].sort((a, b) => (b.frustrated / (b.frustrated + b.notFrustrated)) - (a.frustrated / (a.frustrated + a.notFrustrated)))[0];
+      const lowest = [...frustrationData].sort((a, b) => (a.frustrated / (a.frustrated + a.notFrustrated)) - (b.frustrated / (b.frustrated + b.notFrustrated)))[0];
+
+      tiles.innerHTML = "";
+      const tileSpec = [
+        { label: "Total clients sampled", value: totalSample, sub: "across the three setups" },
+        { label: "Reported frustration", value: totalFrustrated, sub: overallPct.toFixed(1) + "% of sample" },
+        { label: "Most frustrating setup", value: top.name.split(" ")[0], sub: ((top.frustrated / (top.frustrated + top.notFrustrated)) * 100).toFixed(1) + "% frustrated" },
+        { label: "Calmest setup", value: lowest.name.split(" ")[0], sub: ((lowest.frustrated / (lowest.frustrated + lowest.notFrustrated)) * 100).toFixed(1) + "% frustrated" }
+      ];
+      for (const tile of tileSpec) {
+        const div = document.createElement("div");
+        div.className = "stat-tile";
+        div.innerHTML = '<div class="label">' + tile.label + '</div><div class="value">' + tile.value + '</div><div class="sub">' + tile.sub + '</div>';
+        tiles.appendChild(div);
+      }
+
+      const barsHost = document.getElementById("frustrationBars");
+      barsHost.innerHTML = "";
+      for (const row of frustrationData) {
+        const total = row.frustrated + row.notFrustrated;
+        const fPct = (row.frustrated / total) * 100;
+        const cPct = 100 - fPct;
+        const bar = document.createElement("div");
+        bar.className = "frustration-bar";
+        bar.innerHTML =
+          '<div class="name">' + row.name + '<span>' + row.description + '</span></div>' +
+          '<div class="stack-bar" role="img" aria-label="' + row.name + ' bar">' +
+            '<div class="seg frustration" style="width: ' + fPct.toFixed(2) + '%">' + (fPct >= 12 ? fPct.toFixed(1) + "%" : "") + '</div>' +
+            '<div class="seg calm" style="width: ' + cPct.toFixed(2) + '%">' + (cPct >= 12 ? cPct.toFixed(1) + "%" : "") + '</div>' +
+          '</div>' +
+          '<div class="total">' + total + ' total</div>';
+        barsHost.appendChild(bar);
+      }
+
+      const tableBody = document.getElementById("frustrationTable");
+      tableBody.innerHTML = "";
+      for (const row of frustrationData) {
+        const total = row.frustrated + row.notFrustrated;
+        const pct = ((row.frustrated / total) * 100).toFixed(1);
+        const tr = document.createElement("tr");
+        tr.innerHTML =
+          '<td>' + row.name + '</td>' +
+          '<td class="num">' + row.frustrated + '</td>' +
+          '<td class="num">' + row.notFrustrated + '</td>' +
+          '<td class="num">' + total + '</td>' +
+          '<td class="num">' + pct + '%</td>';
+        tableBody.appendChild(tr);
+      }
+    }
+
+    /* ========= Relocation to Satwa section ========= */
+    const relocationData = {
+      total: 154,
+      breakdown: [
+        { key: "moved", label: "Moved to Satwa", description: "Already living in the new accommodation", count: 84, color: "#0f766e" },
+        { key: "agreed", label: "Agreed but not moved yet", description: "Confirmed move, transition in progress", count: 39, color: "#7c3aed" },
+        { key: "refused", label: "Refused / Terminated", description: "Did not agree to move; contracts ended", count: 32, color: "#dc2626" }
+      ]
+    };
+
+    function renderRelocation() {
+      const tiles = document.getElementById("relocationTiles");
+      tiles.innerHTML = "";
+      const tileSpec = [
+        { label: "Total sample", value: relocationData.total, sub: "maids reviewed" },
+        { label: "Moved", value: 84, sub: ((84 / relocationData.total) * 100).toFixed(1) + "% of sample" },
+        { label: "Agreed, in transit", value: 39, sub: ((39 / relocationData.total) * 100).toFixed(1) + "% of sample" },
+        { label: "Refused / Terminated", value: 32, sub: ((32 / relocationData.total) * 100).toFixed(1) + "% of sample" }
+      ];
+      for (const tile of tileSpec) {
+        const div = document.createElement("div");
+        div.className = "stat-tile";
+        div.innerHTML = '<div class="label">' + tile.label + '</div><div class="value">' + tile.value + '</div><div class="sub">' + tile.sub + '</div>';
+        tiles.appendChild(div);
+      }
+
+      const svgNS = "http://www.w3.org/2000/svg";
+      const donut = document.getElementById("relocationDonut");
+      while (donut.firstChild) donut.removeChild(donut.firstChild);
+
+      const cx = 100, cy = 100, r = 76, stroke = 30;
+      const sumCounts = relocationData.breakdown.reduce((s, b) => s + b.count, 0);
+      let cumulative = 0;
+      const circumference = 2 * Math.PI * r;
+      const bg = document.createElementNS(svgNS, "circle");
+      bg.setAttribute("cx", cx);
+      bg.setAttribute("cy", cy);
+      bg.setAttribute("r", r);
+      bg.setAttribute("fill", "none");
+      bg.setAttribute("stroke", "rgba(152, 162, 179, 0.18)");
+      bg.setAttribute("stroke-width", stroke);
+      donut.appendChild(bg);
+
+      for (const slice of relocationData.breakdown) {
+        const portion = slice.count / sumCounts;
+        const arc = document.createElementNS(svgNS, "circle");
+        arc.setAttribute("cx", cx);
+        arc.setAttribute("cy", cy);
+        arc.setAttribute("r", r);
+        arc.setAttribute("fill", "none");
+        arc.setAttribute("stroke", slice.color);
+        arc.setAttribute("stroke-width", stroke);
+        arc.setAttribute("stroke-dasharray", (portion * circumference).toFixed(2) + " " + circumference.toFixed(2));
+        arc.setAttribute("stroke-dashoffset", (-cumulative * circumference).toFixed(2));
+        arc.setAttribute("transform", "rotate(-90 " + cx + " " + cy + ")");
+        donut.appendChild(arc);
+        cumulative += portion;
+      }
+
+      const center1 = document.createElementNS(svgNS, "text");
+      center1.setAttribute("x", cx);
+      center1.setAttribute("y", cy - 4);
+      center1.setAttribute("text-anchor", "middle");
+      center1.setAttribute("fill", "var(--text)");
+      center1.setAttribute("font-size", "26");
+      center1.setAttribute("font-weight", "850");
+      center1.textContent = relocationData.total;
+      donut.appendChild(center1);
+
+      const center2 = document.createElementNS(svgNS, "text");
+      center2.setAttribute("x", cx);
+      center2.setAttribute("y", cy + 16);
+      center2.setAttribute("text-anchor", "middle");
+      center2.setAttribute("fill", "var(--muted)");
+      center2.setAttribute("font-size", "11");
+      center2.setAttribute("font-weight", "700");
+      center2.setAttribute("letter-spacing", "0.08em");
+      center2.textContent = "TOTAL SAMPLE";
+      donut.appendChild(center2);
+
+      const rows = document.getElementById("relocationRows");
+      rows.innerHTML = "";
+      for (const slice of relocationData.breakdown) {
+        const pct = ((slice.count / relocationData.total) * 100).toFixed(1);
+        const row = document.createElement("div");
+        row.className = "reloc-row";
+        row.innerHTML =
+          '<div class="swatch-dot" style="background: ' + slice.color + '"></div>' +
+          '<div class="label">' + slice.label + '<span>' + slice.description + '</span></div>' +
+          '<div class="num"><strong>' + slice.count + '</strong><span>' + pct + '%</span></div>';
+        rows.appendChild(row);
+      }
+    }
+
+    /* ========= Tagging peak hours section ========= */
+    const peakHoursData = [
+      { hour: "00:00 - 01:00", count: 8, pct: 0.74 },
+      { hour: "01:00 - 02:00", count: 7, pct: 0.65 },
+      { hour: "03:00 - 04:00", count: 1, pct: 0.09 },
+      { hour: "04:00 - 05:00", count: 1, pct: 0.09 },
+      { hour: "05:00 - 06:00", count: 3, pct: 0.28 },
+      { hour: "06:00 - 07:00", count: 1, pct: 0.09 },
+      { hour: "07:00 - 08:00", count: 13, pct: 1.21 },
+      { hour: "08:00 - 09:00", count: 47, pct: 4.37 },
+      { hour: "09:00 - 10:00", count: 82, pct: 7.63 },
+      { hour: "10:00 - 11:00", count: 81, pct: 7.53 },
+      { hour: "11:00 - 12:00", count: 81, pct: 7.53 },
+      { hour: "12:00 - 13:00", count: 83, pct: 7.72 },
+      { hour: "13:00 - 14:00", count: 73, pct: 6.79 },
+      { hour: "14:00 - 15:00", count: 83, pct: 7.72 },
+      { hour: "15:00 - 16:00", count: 69, pct: 6.42 },
+      { hour: "16:00 - 17:00", count: 54, pct: 5.02 },
+      { hour: "17:00 - 18:00", count: 80, pct: 7.44 },
+      { hour: "18:00 - 19:00", count: 67, pct: 6.23 },
+      { hour: "19:00 - 20:00", count: 59, pct: 5.49 },
+      { hour: "20:00 - 21:00", count: 69, pct: 6.42 },
+      { hour: "21:00 - 22:00", count: 69, pct: 6.42 },
+      { hour: "22:00 - 23:00", count: 33, pct: 3.07 },
+      { hour: "23:00 - 24:00", count: 11, pct: 1.02 }
+    ];
+
+    let peakSortOrder = "desc";
+
+    function renderPeakHours() {
+      const tiles = document.getElementById("peakTiles");
+      const sumCount = peakHoursData.reduce((s, r) => s + r.count, 0);
+      const max = peakHoursData.reduce((m, r) => Math.max(m, r.count), 0);
+      const peak = peakHoursData.reduce((p, r) => (r.count > p.count ? r : p), peakHoursData[0]);
+      const quiet = peakHoursData.filter((r) => r.count > 0).reduce((q, r) => (r.count < q.count ? r : q), { count: Infinity });
+      const top3 = [...peakHoursData].sort((a, b) => b.count - a.count).slice(0, 3);
+      const top3Pct = top3.reduce((s, r) => s + r.pct, 0);
+
+      tiles.innerHTML = "";
+      const tileSpec = [
+        { label: "Total taggings (2 months)", value: sumCount.toLocaleString(), sub: "across all hours" },
+        { label: "Peak hour", value: peak.hour.split(" ")[0], sub: peak.count + " taggings · " + peak.pct.toFixed(2) + "%" },
+        { label: "Top 3 hours share", value: top3Pct.toFixed(1) + "%", sub: "of all taggings" },
+        { label: "Quietest active hour", value: quiet.hour.split(" ")[0], sub: quiet.count + " taggings · " + quiet.pct.toFixed(2) + "%" }
+      ];
+      for (const tile of tileSpec) {
+        const div = document.createElement("div");
+        div.className = "stat-tile";
+        div.innerHTML = '<div class="label">' + tile.label + '</div><div class="value">' + tile.value + '</div><div class="sub">' + tile.sub + '</div>';
+        tiles.appendChild(div);
+      }
+
+      const sorted = peakSortOrder === "desc"
+        ? [...peakHoursData].sort((a, b) => b.count - a.count)
+        : [...peakHoursData].sort((a, b) => a.hour.localeCompare(b.hour));
+
+      const peakThreshold = max * 0.85;
+      const quietThreshold = max * 0.15;
+
+      const host = document.getElementById("peakBars");
+      host.innerHTML = "";
+      for (const row of sorted) {
+        const widthPct = (row.count / max) * 100;
+        let cls = "";
+        if (row.count >= peakThreshold) cls = "peak";
+        else if (row.count <= quietThreshold) cls = "quiet";
+
+        const bar = document.createElement("div");
+        bar.className = "peak-bar";
+        bar.innerHTML =
+          '<div class="hour">' + row.hour.split(" ")[0] + '</div>' +
+          '<div class="track"><div class="fill ' + cls + '" data-target="' + widthPct.toFixed(2) + '"></div></div>' +
+          '<div class="meta">' + row.count + '<span>' + row.pct.toFixed(2) + '%</span></div>';
+        host.appendChild(bar);
+      }
+
+      requestAnimationFrame(() => {
+        host.querySelectorAll(".fill").forEach((el) => {
+          el.style.width = el.dataset.target + "%";
+        });
+      });
+    }
+
+    document.getElementById("peakSort").addEventListener("click", (event) => {
+      const btn = event.target.closest("button[data-sort]");
+      if (!btn) return;
+      peakSortOrder = btn.dataset.sort;
+      document.querySelectorAll("#peakSort button").forEach((b) => b.classList.toggle("active", b === btn));
+      renderPeakHours();
+    });
+
+    renderFrustration();
+    renderRelocation();
+    renderPeakHours();
   </script>
 </body>
 </html>
