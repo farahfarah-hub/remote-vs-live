@@ -1602,30 +1602,30 @@
 
       <section class="card" style="margin-top: 18px;">
         <div class="section-header" style="margin-bottom: 12px;">
-          <h3 style="margin: 0; font-size: 18px; letter-spacing: -0.01em;">Same-day join requests — last 14 days (over chat)</h3>
-          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">The cutoff to start a maid the same day is 12:00. Anything later cannot be fulfilled the same day.</p>
+          <h3 style="margin: 0; font-size: 18px; letter-spacing: -0.01em;">Same-day requests blocked by the 12:00 cutoff — last 14 days (over chat)</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">The cutoff to start a maid the same day is 12:00. These are clients who asked for a same-day join but the request came in after the cutoff, so it could not be fulfilled.</p>
         </div>
 
         <div class="stat-grid">
           <div class="stat-tile">
-            <div class="label">Same-day requests</div>
+            <div class="label">Blocked by cutoff</div>
             <div class="value">3</div>
-            <div class="sub">in the last 14 days</div>
+            <div class="sub">same-day requests we couldn't fulfil</div>
           </div>
           <div class="stat-tile">
-            <div class="label">Total replacements</div>
+            <div class="label">Replacements (context)</div>
             <div class="value">60</div>
-            <div class="sub">in the last 14 days</div>
+            <div class="sub">total replacements in 14 days</div>
           </div>
           <div class="stat-tile">
-            <div class="label">Same-day request rate</div>
-            <div class="value">5%</div>
-            <div class="sub">of replacements asked same day</div>
+            <div class="label">Earliest blocked request</div>
+            <div class="value">12:30</div>
+            <div class="sub">just after the 12:00 cutoff</div>
           </div>
           <div class="stat-tile">
-            <div class="label">Fulfilled same day</div>
-            <div class="value">0</div>
-            <div class="sub">all 3 came after the 12:00 cutoff</div>
+            <div class="label">Latest blocked request</div>
+            <div class="value">13:00</div>
+            <div class="sub">two requests at this time</div>
           </div>
         </div>
 
@@ -1671,7 +1671,7 @@
         </div>
 
         <div class="insight" style="margin-top: 16px;">
-          <strong>Read:</strong> 3 of 60 replacements in the last 14 days (5%) asked for a same-day join — two at 13:00 and one at 12:30. All three came in after the 12:00 cutoff, so none could be fulfilled the same day.
+          <strong>Read:</strong> Out of 60 replacements in the last 14 days, 3 same-day requests were blocked because they came in after the 12:00 cutoff — two at 13:00 and one at 12:30. The total number of clients who asked for same-day service may be higher; this view only counts requests that we could not fulfil because of the cutoff.
         </div>
       </section>
     </div>
