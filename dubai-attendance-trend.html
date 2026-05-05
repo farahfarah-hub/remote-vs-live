@@ -1429,7 +1429,6 @@
   <main class="wrap">
     <nav class="tabnav" id="sectionNav" aria-label="Dashboard sections">
       <button type="button" class="active" data-tab="tab-trend">Attendance Trend</button>
-      <button type="button" data-tab="tab-frustration">Frustration: Remote vs Live</button>
       <button type="button" data-tab="tab-relocation">Relocation to Satwa</button>
       <button type="button" data-tab="tab-peakhours">Tagging Peak Hours</button>
     </nav>
@@ -1439,7 +1438,7 @@
       <div class="eyebrow">Dubai only · Last 14 days</div>
       <h1>Dubai Attendance Trend</h1>
       <p class="subtitle">
-        Remote vs live attendance for the last 14 days (14-27 April), covering Dubai only. 28 April is excluded because the day was still in progress. By default, the chart shows Remote, Live, and All attendance at the same time. Hover over any point to see the count, and use the nationality filter to switch between total, Filipina, and Africans.
+        Remote vs on-site attendance for the last 14 days (14-27 April), covering Dubai only. 28 April is excluded because the day was still in progress. By default, the chart shows Remote, On-Site, and All attendance at the same time. Hover over any point to see the count, and use the nationality filter to switch between total, Filipina, and Africans.
       </p>
     </section>
 
@@ -1449,7 +1448,7 @@
           <div class="control-label">Attendance lines</div>
           <div class="button-row" id="attendanceControls">
             <button type="button" class="active" data-attendance="Remote">Remote</button>
-            <button type="button" class="active" data-attendance="Live">Live</button>
+            <button type="button" class="active" data-attendance="Live">On-Site</button>
             <button type="button" class="active" data-attendance="All">All attendance</button>
           </div>
         </div>
@@ -1471,7 +1470,7 @@
 
       <div class="legend" aria-label="Chart legend">
         <span class="legend-item"><span class="swatch" style="background: var(--remote)"></span>Remote</span>
-        <span class="legend-item"><span class="swatch" style="background: var(--live)"></span>Live</span>
+        <span class="legend-item"><span class="swatch" style="background: var(--live)"></span>On-Site</span>
         <span class="legend-item"><span class="swatch" style="background: var(--total)"></span>All attendance</span>
       </div>
 
@@ -1509,48 +1508,6 @@
     </section>
     </div>
 
-    <div class="tab-section" id="tab-frustration">
-      <section class="hero section-header">
-        <div class="eyebrow">Client experience · Frustration rate</div>
-        <h2>Frustration: Remote vs Live Attendance</h2>
-        <p>Share of clients who reported frustration in each attendance setup, plus the average maid score given by clients (lower means a worse rating). Sunday is shown separately because all live operations are paused that day.</p>
-      </section>
-
-      <section class="card">
-        <div class="stat-grid" id="frustrationTiles"></div>
-
-        <h3 style="margin: 8px 0 12px; font-size: 16px; letter-spacing: -0.01em;">Frustration share by setup</h3>
-        <div id="frustrationBars"></div>
-
-        <div class="legend inline" aria-label="Bar legend">
-          <span class="legend-item"><span class="swatch" style="background: #dc2626"></span>Frustrated</span>
-          <span class="legend-item"><span class="swatch" style="background: #0f766e"></span>Not frustrated</span>
-        </div>
-
-        <h3 style="margin: 22px 0 4px; font-size: 16px; letter-spacing: -0.01em;">Average maid score</h3>
-        <p style="margin: 0 0 10px; font-size: 13px; color: var(--muted);">Average score clients gave the maid in each setup. Lower (more negative) means a worse rating.</p>
-        <div id="frustrationScoreBars"></div>
-
-        <div class="insight" style="margin-top: 18px;">
-          <strong>Read:</strong> Live attendance has the highest frustration rate (39.4%) and a maid score of −3.60. Sunday has the fewest frustrated clients (14.3%) but the lowest maid score (−4.18) — fewer complaints, yet harshest ratings. Remote is calmest by both measures (32.1% frustrated, maid score −2.83).
-        </div>
-
-        <table class="data-table" aria-label="Frustration data table" style="margin-top: 18px;">
-          <thead>
-            <tr>
-              <th>Setup</th>
-              <th class="num">Frustrated</th>
-              <th class="num">Not frustrated</th>
-              <th class="num">Total</th>
-              <th class="num">Frustration %</th>
-              <th class="num">Avg maid score</th>
-            </tr>
-          </thead>
-          <tbody id="frustrationTable"></tbody>
-        </table>
-      </section>
-    </div>
-
     <div class="tab-section" id="tab-relocation">
       <section class="hero section-header">
         <div class="eyebrow">Operations · Relocation to Satwa</div>
@@ -1559,9 +1516,7 @@
       </section>
 
       <section class="card">
-        <div class="stat-grid" id="relocationTiles"></div>
-
-        <div class="relocation-flex" style="margin-top: 8px;">
+        <div class="relocation-flex">
           <div class="donut-wrap">
             <svg id="relocationDonut" class="donut-svg" viewBox="0 0 200 200" role="img" aria-label="Relocation breakdown donut chart"></svg>
           </div>
@@ -9762,7 +9717,7 @@
     const innerHeight = height - margin.top - margin.bottom;
     const attendanceConfig = {
       Remote: { label: "Remote", className: "remote" },
-      Live: { label: "Live", className: "live" },
+      Live: { label: "On-Site", className: "live" },
       All: { label: "All attendance", className: "allAttendance" }
     };
     const nationalityConfig = {
@@ -10060,7 +10015,7 @@
         <span class="pill">${attendanceLabel}</span>
         <span class="pill">Nationality: ${nationalityConfig[nationalityMode]}</span>
         <span class="pill">Remote: ${remoteCount}</span>
-        <span class="pill">Live: ${liveCount}</span>
+        <span class="pill">On-Site: ${liveCount}</span>
         <span class="pill">All attendance: ${allCount}</span>
         ${specialNote}
         ${technicalNote}
@@ -10089,7 +10044,7 @@
                   <td>${escapeHtml(row.nationality)}</td>
                   <td>${escapeHtml(row.housemaidId)}</td>
                   <td>${escapeHtml(row.name)}</td>
-                  <td>${escapeHtml(row.attendance)}</td>
+                  <td>${escapeHtml(row.attendance === "Live" ? "On-Site" : row.attendance)}</td>
                 </tr>
               `).join("")}
             </tbody>
@@ -10141,7 +10096,7 @@
           <div class="stat-value">${totals.remote}</div>
         </div>
         <div class="stat">
-          <div class="stat-label">Live ${nationalityConfig[nationalityMode]}</div>
+          <div class="stat-label">On-Site ${nationalityConfig[nationalityMode]}</div>
           <div class="stat-value">${totals.live}</div>
         </div>
         <div class="stat">
@@ -10199,90 +10154,6 @@
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
-    /* ========= Frustration section ========= */
-    const frustrationData = [
-      { name: "Live attendance", description: "Maid physically attends the office", frustrated: 13, notFrustrated: 20, avgScore: -3.6 },
-      { name: "Remote attendance", description: "Maid attends from her home", frustrated: 9, notFrustrated: 19, avgScore: -2.829 },
-      { name: "Sunday attendance", description: "Sundays only — all remote from home", frustrated: 1, notFrustrated: 6, avgScore: -4.177 }
-    ];
-
-    function renderFrustration() {
-      const tiles = document.getElementById("frustrationTiles");
-      const totalFrustrated = frustrationData.reduce((s, r) => s + r.frustrated, 0);
-      const totalSample = frustrationData.reduce((s, r) => s + r.frustrated + r.notFrustrated, 0);
-      const overallPct = (totalFrustrated / totalSample) * 100;
-      const top = [...frustrationData].sort((a, b) => (b.frustrated / (b.frustrated + b.notFrustrated)) - (a.frustrated / (a.frustrated + a.notFrustrated)))[0];
-      const lowest = [...frustrationData].sort((a, b) => (a.frustrated / (a.frustrated + a.notFrustrated)) - (b.frustrated / (b.frustrated + b.notFrustrated)))[0];
-      const mostIntense = [...frustrationData].sort((a, b) => a.avgScore - b.avgScore)[0];
-
-      tiles.innerHTML = "";
-      const tileSpec = [
-        { label: "Total clients sampled", value: totalSample, sub: "across the three setups" },
-        { label: "Reported frustration", value: totalFrustrated, sub: overallPct.toFixed(1) + "% of sample" },
-        { label: "Highest frustration rate", value: top.name.split(" ")[0], sub: ((top.frustrated / (top.frustrated + top.notFrustrated)) * 100).toFixed(1) + "% frustrated" },
-        { label: "Lowest avg maid score", value: mostIntense.avgScore.toFixed(2), sub: mostIntense.name.split(" ")[0] + " setup" }
-      ];
-      for (const tile of tileSpec) {
-        const div = document.createElement("div");
-        div.className = "stat-tile";
-        div.innerHTML = '<div class="label">' + tile.label + '</div><div class="value">' + tile.value + '</div><div class="sub">' + tile.sub + '</div>';
-        tiles.appendChild(div);
-      }
-
-      const barsHost = document.getElementById("frustrationBars");
-      barsHost.innerHTML = "";
-      for (const row of frustrationData) {
-        const total = row.frustrated + row.notFrustrated;
-        const fPct = (row.frustrated / total) * 100;
-        const cPct = 100 - fPct;
-        const bar = document.createElement("div");
-        bar.className = "frustration-bar";
-        bar.innerHTML =
-          '<div class="name">' + row.name + '<span>' + row.description + '</span></div>' +
-          '<div class="stack-bar" role="img" aria-label="' + row.name + ' bar">' +
-            '<div class="seg frustration" style="width: ' + fPct.toFixed(2) + '%">' + (fPct >= 12 ? fPct.toFixed(1) + "%" : "") + '</div>' +
-            '<div class="seg calm" style="width: ' + cPct.toFixed(2) + '%">' + (cPct >= 12 ? cPct.toFixed(1) + "%" : "") + '</div>' +
-          '</div>' +
-          '<div class="total">' + total + ' total</div>';
-        barsHost.appendChild(bar);
-      }
-
-      const scoreHost = document.getElementById("frustrationScoreBars");
-      scoreHost.innerHTML = "";
-      const maxAbs = Math.max(...frustrationData.map((r) => Math.abs(r.avgScore)));
-      for (const row of frustrationData) {
-        const fillPct = (Math.abs(row.avgScore) / maxAbs) * 100;
-        const bar = document.createElement("div");
-        bar.className = "score-bar";
-        bar.innerHTML =
-          '<div class="name">' + row.name + '<span>' + row.description + '</span></div>' +
-          '<div class="track" role="img" aria-label="' + row.name + ' average score"><div class="fill" data-target="' + fillPct.toFixed(2) + '"></div></div>' +
-          '<div class="meta">' + row.avgScore.toFixed(2) + '<span>avg maid score</span></div>';
-        scoreHost.appendChild(bar);
-      }
-      requestAnimationFrame(() => {
-        scoreHost.querySelectorAll(".fill").forEach((el) => {
-          el.style.width = el.dataset.target + "%";
-        });
-      });
-
-      const tableBody = document.getElementById("frustrationTable");
-      tableBody.innerHTML = "";
-      for (const row of frustrationData) {
-        const total = row.frustrated + row.notFrustrated;
-        const pct = ((row.frustrated / total) * 100).toFixed(1);
-        const tr = document.createElement("tr");
-        tr.innerHTML =
-          '<td>' + row.name + '</td>' +
-          '<td class="num">' + row.frustrated + '</td>' +
-          '<td class="num">' + row.notFrustrated + '</td>' +
-          '<td class="num">' + total + '</td>' +
-          '<td class="num">' + pct + '%</td>' +
-          '<td class="num">' + row.avgScore.toFixed(2) + '</td>';
-        tableBody.appendChild(tr);
-      }
-    }
-
     /* ========= Relocation to Satwa section ========= */
     const relocationData = {
       total: 154,
@@ -10294,21 +10165,6 @@
     };
 
     function renderRelocation() {
-      const tiles = document.getElementById("relocationTiles");
-      tiles.innerHTML = "";
-      const tileSpec = [
-        { label: "Total sample", value: relocationData.total, sub: "maids reviewed" },
-        { label: "Moved", value: 84, sub: ((84 / relocationData.total) * 100).toFixed(1) + "% of sample" },
-        { label: "Agreed, in transit", value: 39, sub: ((39 / relocationData.total) * 100).toFixed(1) + "% of sample" },
-        { label: "Refused / Terminated", value: 32, sub: ((32 / relocationData.total) * 100).toFixed(1) + "% of sample" }
-      ];
-      for (const tile of tileSpec) {
-        const div = document.createElement("div");
-        div.className = "stat-tile";
-        div.innerHTML = '<div class="label">' + tile.label + '</div><div class="value">' + tile.value + '</div><div class="sub">' + tile.sub + '</div>';
-        tiles.appendChild(div);
-      }
-
       const svgNS = "http://www.w3.org/2000/svg";
       const donut = document.getElementById("relocationDonut");
       while (donut.firstChild) donut.removeChild(donut.firstChild);
@@ -10468,7 +10324,6 @@
       renderPeakHours();
     });
 
-    renderFrustration();
     renderRelocation();
     renderPeakHours();
   </script>
