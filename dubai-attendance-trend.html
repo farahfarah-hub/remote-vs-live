@@ -1423,6 +1423,98 @@
         text-align: left;
       }
     }
+
+    .reloc-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .reloc-toolbar input,
+    .reloc-toolbar select {
+      font: inherit;
+      padding: 9px 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(152, 162, 179, 0.32);
+      background: #fff;
+      color: var(--text);
+      min-width: 0;
+    }
+
+    .reloc-toolbar input { flex: 1 1 220px; }
+    .reloc-toolbar select { flex: 1 1 170px; }
+
+    .reloc-count {
+      margin-left: auto;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .reloc-table-wrap {
+      max-height: 480px;
+      overflow: auto;
+      border: 1px solid rgba(152, 162, 179, 0.22);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    .reloc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .reloc-table th,
+    .reloc-table td {
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(152, 162, 179, 0.18);
+      vertical-align: top;
+    }
+
+    .reloc-table th {
+      position: sticky;
+      top: 0;
+      background: rgba(124, 58, 237, 0.06);
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
+      z-index: 1;
+    }
+
+    .reloc-table th.num,
+    .reloc-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    .reloc-table th[data-active="asc"]::after { content: " \\25B2"; }
+    .reloc-table th[data-active="desc"]::after { content: " \\25BC"; }
+
+    .reloc-table tr:last-child td { border-bottom: 0; }
+    .reloc-table tr:hover td { background: rgba(124, 58, 237, 0.04); }
+
+    .pill-status {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+
+    .pill-status.moved { background: rgba(15, 118, 110, 0.12); color: #0f766e; }
+    .pill-status.pending { background: rgba(124, 58, 237, 0.12); color: #6d28d9; }
+    .pill-status.terminated { background: rgba(220, 38, 38, 0.12); color: #b91c1c; }
+    .pill-status.other { background: rgba(100, 116, 139, 0.14); color: #475569; }
+
+    @media (max-width: 600px) {
+      .reloc-table th, .reloc-table td { padding: 8px 9px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -1512,7 +1604,7 @@
       <section class="hero section-header">
         <div class="eyebrow">Operations · Relocation to Satwa</div>
         <h2>Relocation to Satwa Summary</h2>
-        <p>Of <strong>154 maids</strong> in scope, this is the breakdown of who already moved, who agreed and is still in transit, and who refused (and was terminated).</p>
+        <p>Of <strong>161 maids</strong> in scope, this is the breakdown of who already moved, who has not moved yet (still in progress), and who refused (or is pending termination). Numbers come directly from the relocation summary CSV.</p>
       </section>
 
       <section class="card">
@@ -1524,7 +1616,37 @@
         </div>
 
         <div class="insight" style="margin-top: 18px;">
-          <strong>Read:</strong> 54.5% of the sample (84 maids) have already moved to Satwa, another 25.3% (39) agreed but are still moving, and 20.8% (32) refused and were terminated.
+          <strong>Read:</strong> 59.6% of the sample (96 maids) have already moved to Satwa, 18.0% (29) have not moved yet (notice in progress, no response, or pending cash approval), and 22.4% (36) refused and are being terminated.
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 18px;">
+        <div class="section-header" style="margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 18px; letter-spacing: -0.01em;">Raw data — relocation summary</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">All 161 rows from the source CSV. Filter by status or nationality, or search by name.</p>
+        </div>
+
+        <div class="reloc-toolbar">
+          <input id="relocSearch" type="search" placeholder="Search name…" autocomplete="off" />
+          <select id="relocStatus" aria-label="Filter by status"><option value="">All statuses</option></select>
+          <select id="relocNat" aria-label="Filter by nationality"><option value="">All nationalities</option></select>
+          <span class="reloc-count" id="relocCount"></span>
+        </div>
+
+        <div class="reloc-table-wrap">
+          <table class="reloc-table" id="relocTable">
+            <thead>
+              <tr>
+                <th data-sort="idx" class="num">#</th>
+                <th data-sort="name">Name</th>
+                <th data-sort="nationality">Nationality</th>
+                <th data-sort="status">Status (Moved?)</th>
+                <th data-sort="notes">Notes</th>
+                <th data-sort="date">Return date</th>
+              </tr>
+            </thead>
+            <tbody id="relocTbody"></tbody>
+          </table>
         </div>
       </section>
     </div>
@@ -10156,11 +10278,11 @@
 
     /* ========= Relocation to Satwa section ========= */
     const relocationData = {
-      total: 154,
+      total: 161,
       breakdown: [
-        { key: "moved", label: "Moved to Satwa", description: "Already living in the new accommodation", count: 84, color: "#0f766e" },
-        { key: "agreed", label: "Agreed but not moved yet", description: "Confirmed move, transition in progress", count: 39, color: "#7c3aed" },
-        { key: "refused", label: "Refused / Terminated", description: "Did not agree to move; contracts ended", count: 32, color: "#dc2626" }
+        { key: "moved", label: "Moved to Satwa", description: "Already living in the new accommodation", count: 96, color: "#0f766e" },
+        { key: "agreed", label: "Did not move yet / pending", description: "Notice in progress, no response, or pending cash approval", count: 29, color: "#7c3aed" },
+        { key: "refused", label: "Refused / Terminated", description: "Termination pending or already completed", count: 36, color: "#dc2626" }
       ]
     };
 
@@ -10326,6 +10448,112 @@
 
     renderRelocation();
     renderPeakHours();
+
+    /* ========= Relocation raw data table ========= */
+    const relocationRawRows = [{"name":"JOSEPHINE MARATAS DELOTE","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"JULIE CUYA SAN VICENTE","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"THECLA BESONG BESSEM","nationality":"Cameroonian","status":"Moved","notes":"","date":"09/04"},{"name":"Julian Namuwonge","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"ESTHER WANGARI MWANGI","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"MARIA FE SURIGAO RAZON","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"OLIVIA NASSAKA","nationality":"Ugandan","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"BRIDGET SANYU NASSANGA","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"VIVIAN AMPONSAH","nationality":"Ghanaian","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"ANALYN JORDAN JUMAGBON","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Jennifer Santos","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Charito Rabia Torno","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"BEATRICE ODERA","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"JARIILAH NALWANGA","nationality":"Ugandan","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"AYRA GONZALES HAMSI","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"ROSEMARIE BELLOSILLO BRACELINO","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MEDLYN GALAO LINGKONG","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"KRISTINE BERNADETTE SANCHEZ GABRIEL","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"LYDIA SEMBENI WANYONYI","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"Rukia Kambita Mudeya","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"JANETH CABINGAS RIVERA","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"SHADIA NALWOGA","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"MILANY VILLAMOR VIDAL","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"RICHEL PANES ASTRONOMO","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MARVILOU SUMAUY RAMOS.","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"Donita Venus Calixterio","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"AMIELYN GALICIA VILLOSTAS","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"DIANE DELOS ANGELES FAVILLARAN.","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"MERLYN TECSON BUSBUS","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Nina Parra Bagamasbad","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MARICEL ANINIPOT CANCERAN","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"ANALYN JORDAN JUMAGBON.","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"CAROLYNE NAKIWU","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"RAHAB WAMAITHA NJERI","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"SHARON AWUOR OTIENO","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"SUSAN POLINAR GLORIA","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"LORNA JEPCHUMBA KORIR","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"CHANDIMA PRIYANTHE BRANDIGAMPOLAGE","nationality":"Sri Lankan","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"FAITH KATHINI MUTUA","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"ANABELLE SABARILLO ABULENCIA","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"SHERYL PANJIKAL GALO","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"PRIYADARSHANI MENIKE APAREKKE JAYASUNDARA MUDIYANSELAGE","nationality":"Sri Lankan","status":"Moved","notes":"","date":"09/04"},{"name":"Alma Belingan Nosete","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"RONA FE LARANANG CACHUELA","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MAYLINDA FUENTES QUIATCHON","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MELVIE MARINGUEZ HINOJALES","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Ma Eloisa Catungal De la vega","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"GINALYN CUARESMA BELMORO","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MARY JANE MONFERO TORRES","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"EVANGELINE LAVICTORIA ABUNDA","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"Velma Abrelio Patente","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"HANIFA NAMUDDU","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"KRISTINE BERNADETTE SANCHEZ GABRIEL","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"REYMONIA FUEGO IGAT","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"KRISTINE BERNADETTE SANCHEZ GABRIEL","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Rosalie Arlos Reyes","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Bambie Montesino Jayme","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"Fridah Kainda Ngai","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"Mary Jane Buensuceso Bonifacio","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MARICEL BALON TORRES","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"ARDEZ JOY GULAHAB TUASTOMBAN","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"ANGELA AMANKWAH ANDOH","nationality":"Ghanaian","status":"Moved","notes":"","date":"09/04"},{"name":"PROSSY NAKAYENGA","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"Lalyn Ascura Balsomo","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Rubylen Abonales Caburobias","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Katherine De Vela Gestiada","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Evelyn Cailing Aspirin","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Jessica Dumlao Quinio","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"Milka Ngonyo Gakungi","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"Cathren Alfeche Sayago","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"JOSEPHINE MARATAS DELOTE","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"MARY JEAN MARAVELES SUMILE","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"EVELYN PAJIMNA LEABRES","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Donita Venus Calixterio","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"SARAH ADONU","nationality":"Ghanaian","status":"Moved","notes":"","date":"09/04"},{"name":"ASIA NANSEREKO","nationality":"Ugandan","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"LINDA BOATENG","nationality":"Ghanaian","status":"Moved","notes":"","date":"09/04"},{"name":"MARIETTA NDUNGE MULI","nationality":"Kenyan","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"MICHELLE ABALAJON LASALITA","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"ANNE WARUGURU WARUE","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"NAOMI WANJIRU WAIRIMU","nationality":"Kenyan","status":"Moved","notes":"","date":"09/04"},{"name":"BERNADETTE PAYO LAGUTIN","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"09/04"},{"name":"Rocelyn Donton Camingawan","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Renelym Palma Baoy","nationality":"Filipina","status":"Did Not Move Yet","notes":"Notice Needed till EOM","date":"09/04"},{"name":"Mayvelyn Quijano Ramirez","nationality":"Filipina","status":"Moved","notes":"","date":"09/04"},{"name":"Sharon Mutoni","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"SAUDA NAZIMULI","nationality":"Ugandan","status":"Moved","notes":"","date":"09/04"},{"name":"Jesyl Zamora Legaspe","nationality":"Filipina","status":"No Response","notes":"Notice Needed till EOM","date":"01/05"},{"name":"JOY BONIFACIO","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"01/05"},{"name":"JOAN NAHURIRA","nationality":"Ugandan","status":"Moved","notes":"","date":"01/05"},{"name":"INNOCENTIAL BENEWAA","nationality":"Ghanaian","status":"Employment Terminated","notes":"","date":"06/04"},{"name":"LEAH LYN OMPOC ANDO","nationality":"Filipina","status":"Moved","notes":"","date":"06/04"},{"name":"ANARUBY CATALAN LINSAGAN","nationality":"Filipina","status":"Moved","notes":"","date":"06/04"},{"name":"REJINN FLORES SONET","nationality":"Filipina","status":"Moved","notes":"","date":"06/04"},{"name":"LIZZY CHEPKAZI","nationality":"Kenyan","status":"Moved","notes":"","date":"06/04"},{"name":"NASSIRA MUTESI","nationality":"Ugandan","status":"Moved","notes":"","date":"06/04"},{"name":"TERRY CHEPKURUI KIPSANG","nationality":"Kenyan","status":"Moved","notes":"","date":"06/04"},{"name":"ANNABELLE GUTIERREZ TEDRANES","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"06/04"},{"name":"SYLVIA KERUBO RATEMO","nationality":"Kenyan","status":"Moved","notes":"","date":"07/04"},{"name":"JOZENETH QUINANOLA TAMPOS","nationality":"Filipina","status":"Moved","notes":"","date":"07/04"},{"name":"MARY NJOKI NDIRANGU","nationality":"Kenyan","status":"Employment Terminated","notes":"","date":"07/04"},{"name":"LENLEN BAUN GABRIEL","nationality":"Filipina","status":"Did Not Move Yet","notes":"Notice Needed till EOM","date":"07/04"},{"name":"PHELISTERS ADHIAMBO JOMO","nationality":"Kenyan","status":"Moved","notes":"","date":"10/04"},{"name":"SHIRLY ASIL AGUSTIN","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"10/04"},{"name":"Grace Ballescas Coquilla","nationality":"Filipina","status":"Moved","notes":"","date":"10/04"},{"name":"APRIL LOU DAMIAN LUMAHAN","nationality":"Filipina","status":"Pending Cash Approval","notes":"Notice Needed till EOM","date":"10/04"},{"name":"SAMALIE NANTEGE","nationality":"Ugandan","status":"Employment Terminated","notes":"","date":"13/04"},{"name":"Jennifer Quezon Romasanta","nationality":"Filipina","status":"Moved","notes":"","date":"13/04"},{"name":"NEILCIN VALLESTERO ALBANO","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"13/04"},{"name":"CAROLINE GATHONI MAINA","nationality":"Kenyan","status":"Moved","notes":"","date":"13/04"},{"name":"Joy Sunday Daniel","nationality":"Nigerian","status":"Moved","notes":"","date":"13/04"},{"name":"IRENE REYES DE GUZMAN","nationality":"Filipina","status":"Did Not Move Yet","notes":"Notice Needed till EOM","date":"13/04"},{"name":"LAVELYN LANAS SATO","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"13/04"},{"name":"Elizabeth Zanabu Sabogu","nationality":"Ghanaian","status":"Moved","notes":"","date":"13/04"},{"name":"Arlene Cabali De Quiroz","nationality":"Filipina","status":"Did Not Move Yet","notes":"Notice Needed till EOM","date":"13/04"},{"name":"Shari Hannah Casaysay Ayungao","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"14/04"},{"name":"CHRISTINE MALLORCA DESTACAMENTO","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"14/04"},{"name":"LAYSA BAGAY GANDIA","nationality":"Filipina","status":"Moved","notes":"","date":"14/04"},{"name":"NELVE CATUDIO SALCEDO","nationality":"Filipina","status":"Employment Terminated","notes":"","date":"14/04"},{"name":"Shybel Ann Miano Nillas","nationality":"Filipina","status":"Did Not Move Yet, Moved","notes":"","date":"15/04"},{"name":"Gloria Nalwoga","nationality":"Ugandan","status":"For Termination","notes":"","date":"15/04"},{"name":"LADY LANE LASALA VILLADIEGO","nationality":"Filipina","status":"For Termination","notes":"","date":"15/04"},{"name":"REHEMA BALUKA","nationality":"Ugandan","status":"Moved","notes":"","date":"17/04"},{"name":"AIZA JINTALAN LASALA","nationality":"Filipina","status":"Moved","notes":"","date":"17/04"},{"name":"Careen Ajiambo Odwori","nationality":"Kenyan","status":"Moved","notes":"","date":"17/04"},{"name":"ZAWADI NDUKU KYALO","nationality":"Kenyan","status":"For Termination","notes":"","date":"17/04"},{"name":"MARICEL ANINIPOT CANCERAN","nationality":"Filipina","status":"Moved","notes":"","date":"18/04"},{"name":"VICTORIA NTIM","nationality":"Ghanaian","status":"Did Not Move Yet","notes":"","date":"18/04"},{"name":"CHANDIMA PRIYANTHE BRANDIGAMPOLAGE","nationality":"Sri Lankan","status":"Moved","notes":"","date":"18/04"},{"name":"ROSELYN RECLOSADO","nationality":"Filipina","status":"For Termination","notes":"","date":"21/04"},{"name":"Bridget Namuli Nangobi","nationality":"Ugandan","status":"Moved","notes":"","date":"21/04"},{"name":"JUVILYN CASTARDO PAMAOS","nationality":"Filipina","status":"Did Not Move Yet","notes":"Notice Needed till EOM","date":"22/04"},{"name":"JACKLINE NYAWIRA MUCERU","nationality":"Kenyan","status":"Moved","notes":"","date":"23/04"},{"name":"Jenalyn Velasco Ubongen","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"23/04"},{"name":"ROSALINDA VILLANUEVA ACOJEDO","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"23/04"},{"name":"LUIEGENE RIVERA QUITOR.","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"23/04"},{"name":"MARICEL MILLA MANJARES","nationality":"Filipina","status":"Pending Cash Approval","notes":"","date":"23/04"},{"name":"ROSE MARIE MONCADA PATIGA","nationality":"Filipina","status":"Moved","notes":"","date":"23/04"},{"name":"Glenda Gloduve Pisuena","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"23/04"},{"name":"MARY JOY AGUSTIN ABARI","nationality":"Filipina","status":"No Response","notes":"","date":"24/04"},{"name":"PRISCILLAH ANUPI ODANGA","nationality":"Kenyan","status":"Did Not Move Yet","notes":"","date":"27/04"},{"name":"JULIET NUNEZ PABLO","nationality":"Filipina","status":"For Termination","notes":"","date":"27/04"},{"name":"NORINA DAMUCOM UGAN","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"27/04"},{"name":"JANE NYONI","nationality":"Zimbabwean","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"RONNIEDA LERUM GARCIA","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"BRENDALYN LUMBAY ANTANI","nationality":"Filipina","status":"Moved","notes":"","date":"28/04"},{"name":"Lenie Burdeos Refran","nationality":"Filipina","status":"Moved","notes":"","date":"28/04"},{"name":"CHARO ERANES TOLENTINO","nationality":"Filipina","status":"Moved","notes":"","date":"28/04"},{"name":"GRACE WAMBUI NJANO","nationality":"Kenyan","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"RUTH CAYABO ABSIN","nationality":"Filipina","status":"Moved","notes":"","date":"28/04"},{"name":"ETHEL MARIE MARTINEZ FUENTES","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"VANNEZA DAYAN BUOT","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"JULIET IMBAYA ODUOR","nationality":"Kenyan","status":"Moved","notes":"","date":"28/04"},{"name":"CHARLENE ARCABAL DIANSE","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"RISSAH DAGUAY SANGILAN","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"ROSE NABUKENYA","nationality":"Ugandan","status":"Did Not Move Yet","notes":"","date":"28/04"},{"name":"LUCY SACKEY","nationality":"Ghanaian","status":"Did Not Move Yet","notes":"","date":"29/04"},{"name":"SELESTINE INGOSI","nationality":"Kenyan","status":"Moved","notes":"","date":"29/04"},{"name":"JANJI MAE BARCELONA FERCIA.","nationality":"Filipina","status":"No Response","notes":"","date":"30/04"},{"name":"MARILOU BAUTISTA DASAS","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"30/04"},{"name":"Geraldine Magallanes Raga","nationality":"Filipina","status":"Did Not Move Yet","notes":"","date":"30/04"}];
+
+    function bucketStatus(status) {
+      const s = (status || "").toLowerCase();
+      if (s === "moved") return "moved";
+      if (s.includes("did not move yet") && s.includes("moved")) return "moved";
+      if (s === "did not move yet" || s === "no response" || s === "pending cash approval") return "pending";
+      if (s === "employment terminated" || s === "for termination") return "terminated";
+      return "other";
+    }
+
+    function escapeHTML(s) {
+      return String(s || "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+    }
+
+    function uniqueSorted(arr) {
+      return [...new Set(arr)].sort((a, b) => a.localeCompare(b));
+    }
+
+    const relocStatusSelect = document.getElementById("relocStatus");
+    const relocNatSelect = document.getElementById("relocNat");
+    const relocSearch = document.getElementById("relocSearch");
+    const relocTbody = document.getElementById("relocTbody");
+    const relocCount = document.getElementById("relocCount");
+
+    uniqueSorted(relocationRawRows.map((r) => r.status).filter(Boolean)).forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s;
+      opt.textContent = s;
+      relocStatusSelect.appendChild(opt);
+    });
+    uniqueSorted(relocationRawRows.map((r) => r.nationality).filter(Boolean)).forEach((n) => {
+      const opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = n;
+      relocNatSelect.appendChild(opt);
+    });
+
+    let relocSortKey = "idx";
+    let relocSortDir = "asc";
+    const relocIndexed = relocationRawRows.map((r, i) => Object.assign({ idx: i + 1 }, r));
+
+    function renderRelocTable() {
+      const status = relocStatusSelect.value;
+      const nat = relocNatSelect.value;
+      const q = relocSearch.value.trim().toLowerCase();
+
+      const filtered = relocIndexed.filter((r) => {
+        if (status && r.status !== status) return false;
+        if (nat && r.nationality !== nat) return false;
+        if (q && !r.name.toLowerCase().includes(q)) return false;
+        return true;
+      });
+
+      const sorted = [...filtered].sort((a, b) => {
+        const va = a[relocSortKey];
+        const vb = b[relocSortKey];
+        if (typeof va === "number" && typeof vb === "number") {
+          return relocSortDir === "asc" ? va - vb : vb - va;
+        }
+        const sa = String(va || "");
+        const sb = String(vb || "");
+        return relocSortDir === "asc" ? sa.localeCompare(sb) : sb.localeCompare(sa);
+      });
+
+      relocTbody.innerHTML = sorted.map((r) => {
+        const bucket = bucketStatus(r.status);
+        return (
+          "<tr>" +
+          '<td class="num">' + r.idx + "</td>" +
+          "<td>" + escapeHTML(r.name) + "</td>" +
+          "<td>" + escapeHTML(r.nationality) + "</td>" +
+          '<td><span class="pill-status ' + bucket + '">' + escapeHTML(r.status || "—") + "</span></td>" +
+          "<td>" + escapeHTML(r.notes) + "</td>" +
+          "<td>" + escapeHTML(r.date) + "</td>" +
+          "</tr>"
+        );
+      }).join("");
+
+      relocCount.textContent = filtered.length + " of " + relocationRawRows.length + " rows";
+
+      document.querySelectorAll("#relocTable th[data-sort]").forEach((th) => {
+        th.dataset.active = th.dataset.sort === relocSortKey ? relocSortDir : "";
+      });
+    }
+
+    document.querySelectorAll("#relocTable th[data-sort]").forEach((th) => {
+      th.addEventListener("click", () => {
+        const key = th.dataset.sort;
+        if (relocSortKey === key) {
+          relocSortDir = relocSortDir === "asc" ? "desc" : "asc";
+        } else {
+          relocSortKey = key;
+          relocSortDir = "asc";
+        }
+        renderRelocTable();
+      });
+    });
+
+    relocStatusSelect.addEventListener("change", renderRelocTable);
+    relocNatSelect.addEventListener("change", renderRelocTable);
+    relocSearch.addEventListener("input", renderRelocTable);
+
+    renderRelocTable();
   </script>
 </body>
 </html>
