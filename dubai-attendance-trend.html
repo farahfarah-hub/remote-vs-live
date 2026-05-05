@@ -1424,6 +1424,73 @@
       }
     }
 
+    .extension-card .ext-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .extension-card .ext-tile {
+      border-radius: 14px;
+      padding: 14px 16px;
+      border: 1px solid rgba(152, 162, 179, 0.22);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .extension-card .ext-pct {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .extension-card .ext-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .extension-card .ext-label {
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .extension-card .ext-moved { border-color: rgba(15, 118, 110, 0.35); background: rgba(15, 118, 110, 0.06); }
+    .extension-card .ext-moved .ext-pct { color: #0f766e; }
+
+    .extension-card .ext-pending { border-color: rgba(124, 58, 237, 0.35); background: rgba(124, 58, 237, 0.06); }
+    .extension-card .ext-pending .ext-pct { color: #6d28d9; }
+
+    .extension-card .ext-terminated { border-color: rgba(220, 38, 38, 0.35); background: rgba(220, 38, 38, 0.06); }
+    .extension-card .ext-terminated .ext-pct { color: #b91c1c; }
+
+    .extension-card .ext-stack {
+      display: flex;
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: rgba(152, 162, 179, 0.18);
+    }
+
+    .extension-card .ext-stack-seg { display: block; height: 100%; }
+    .extension-card .ext-seg-moved { background: #0f766e; }
+    .extension-card .ext-seg-pending { background: #7c3aed; }
+    .extension-card .ext-seg-terminated { background: #dc2626; }
+
+    @media (max-width: 720px) {
+      .extension-card .ext-grid { grid-template-columns: 1fr; }
+    }
+
     .reloc-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -1617,6 +1684,41 @@
 
         <div class="insight" style="margin-top: 18px;">
           <strong>Read:</strong> 59.6% of the sample (96 maids) have already moved to Satwa, 18.0% (29) have not moved yet (notice in progress, no response, or pending cash approval), and 22.4% (36) refused and are being terminated.
+        </div>
+      </section>
+
+      <section class="card extension-card" style="margin-top: 18px;">
+        <div class="section-header" style="margin-bottom: 12px;">
+          <h3 style="margin: 0; font-size: 18px; letter-spacing: -0.01em;">Deadline extensions — returning maids</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0;">Sample of <strong>70 returning housemaids</strong> · <strong>15 received an extension</strong> (21.4% of the sample).</p>
+        </div>
+
+        <div class="ext-grid">
+          <div class="ext-tile ext-moved">
+            <div class="ext-pct">60%</div>
+            <div class="ext-num">9 of 15</div>
+            <div class="ext-label">Moved</div>
+          </div>
+          <div class="ext-tile ext-pending">
+            <div class="ext-pct">20%</div>
+            <div class="ext-num">3 of 15</div>
+            <div class="ext-label">Did not move yet</div>
+          </div>
+          <div class="ext-tile ext-terminated">
+            <div class="ext-pct">20%</div>
+            <div class="ext-num">3 of 15</div>
+            <div class="ext-label">Terminated after extension</div>
+          </div>
+        </div>
+
+        <div class="ext-stack" aria-hidden="true">
+          <span class="ext-stack-seg ext-seg-moved" style="width: 60%;" title="Moved · 60%"></span>
+          <span class="ext-stack-seg ext-seg-pending" style="width: 20%;" title="Did not move yet · 20%"></span>
+          <span class="ext-stack-seg ext-seg-terminated" style="width: 20%;" title="Terminated · 20%"></span>
+        </div>
+
+        <div class="insight" style="margin-top: 16px;">
+          <strong>Read:</strong> Extensions are mostly given to maids with good scores who need time for notice periods or rent already paid. Per the agreed automation, maids with <strong>positive scores</strong> get <strong>2 weeks</strong> of extra time, and maids with <strong>negative scores (down to −5)</strong> get <strong>1 week</strong>.
         </div>
       </section>
 
